@@ -36,6 +36,15 @@ function App() {
     addTaskInput.current.value = "";
   };
 
+  const removeTodo = (todoToRemove) => {
+    let newTodos = todos.filter((todo) => {
+      if (todo.id != todoToRemove.id) {
+        return todo;
+      }
+    });
+    setTodos(newTodos);
+  };
+
   return (
     <>
       <div className="w-full min-h-[100vh] flex justify-center items-center">
@@ -80,9 +89,23 @@ function App() {
             </button>
           </div>
           <div className="flex flex-col gap-4 mt-4">
-            {todos.map((todo) => {
-              return <Todo key={todo.id} todo={todo} />;
-            })}
+            {showFinished
+              ? todos.map((todo) => {
+                  return (
+                    <Todo key={todo.id} todo={todo} removeTodo={removeTodo} />
+                  );
+                })
+              : todos
+                  .filter((todo) => {
+                    if (!todo.finished) {
+                      return todo;
+                    }
+                  })
+                  .map((todo) => {
+                    return (
+                      <Todo key={todo.id} todo={todo} removeTodo={removeTodo} />
+                    );
+                  })}
           </div>
         </div>
       </div>
