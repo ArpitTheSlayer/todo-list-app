@@ -1,39 +1,56 @@
 import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import Todo from "./components/Todo";
 
 function App() {
-  const [showFinished, setShowFinished] = useState(false);
-  const [id, setId] = useState(3);
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      title: "Exercise",
-      finished: true,
-    },
-    {
-      id: 2,
-      title: "Code",
-      finished: false,
-    },
-  ]);
+  const [showFinished, setShowFinished] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTodoId, setEditTodoId] = useState("");
+  const [todos, setTodos] = useState([]);
 
   const addTaskInput = useRef();
+
+  useEffect(() => {
+    if (localStorage.getItem("todos"))
+      setTodos(JSON.parse(localStorage.getItem("todos")));
+  }, []);
 
   useEffect(() => {
     console.log(todos);
   }, [todos]);
 
+  const saveToLocalStorage = (todos) => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  };
+
   const addTodo = () => {
     setTodos([
       ...todos,
       {
-        id: id,
+        id: uuidv4(),
         title: addTaskInput.current.value,
         finished: false,
       },
     ]);
-    setId(id + 1);
+    saveToLocalStorage(todos);
     addTaskInput.current.value = "";
+  };
+
+  const editTodo = (todoToEdit) => {
+    setIsEditing(true);
+    setEditTodoId(todoToEdit.id);
+    addTaskInput.current.value = todoToEdit.title;
+  };
+
+  const saveEditedTodo = () => {
+    setIsEditing(false);
+    todos.forEach((todo) => {
+      if (todo.id === editTodoId) {
+        todo.title = addTaskInput.current.value;
+        addTaskInput.current.value = "";
+      }
+    });
+    saveToLocalStorage(todos);
   };
 
   const removeTodo = (todoToRemove) => {
@@ -43,12 +60,27 @@ function App() {
       }
     });
     setTodos(newTodos);
+    saveToLocalStorage(todos);
+  };
+
+  const todoElement = (todo) => {
+    return (
+      <Todo
+        key={todo.id}
+        todos={todos}
+        todo={todo}
+        addTaskInput={addTaskInput}
+        editTodo={editTodo}
+        removeTodo={removeTodo}
+        saveToLocalStorage={saveToLocalStorage}
+      />
+    );
   };
 
   return (
     <>
       <div className="w-full min-h-[100vh] flex justify-center items-center">
-        <div className="text-[var(--primary-color)] w-md">
+        <div className="text-[var(--primary-color)] w-md my-8">
           <h1 className="font-bold text-3xl mb-8">Todo List</h1>
           <div className="flex gap-2 items-center mb-2">
             <input
@@ -66,12 +98,23 @@ function App() {
           <div className="flex gap-4">
             <input
               type="text"
+              name="todo"
               placeholder="Add new task"
               ref={addTaskInput}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!isEditing && addTaskInput.current.value !== "")
+                    addTodo();
+                  if (isEditing) saveEditedTodo();
+                }
+              }}
               className="border-b-2 border-b-gray-400 w-sm outline-none font-medium placeholder:font-medium placeholder:text-gray-400 px-2"
             />
             <button
-              onClick={addTodo}
+              onClick={() => {
+                if (!isEditing && addTaskInput.current.value !== "") addTodo();
+                if (isEditing) saveEditedTodo();
+              }}
               className="bg-[var(--primary-color)] flex justify-center items-center rounded-xl aspect-square w-10 cursor-pointer"
             >
               <svg
@@ -91,9 +134,7 @@ function App() {
           <div className="flex flex-col gap-4 mt-4">
             {showFinished
               ? todos.map((todo) => {
-                  return (
-                    <Todo key={todo.id} todo={todo} removeTodo={removeTodo} />
-                  );
+                  return todoElement(todo);
                 })
               : todos
                   .filter((todo) => {
@@ -102,9 +143,7 @@ function App() {
                     }
                   })
                   .map((todo) => {
-                    return (
-                      <Todo key={todo.id} todo={todo} removeTodo={removeTodo} />
-                    );
+                    return todoElement(todo);
                   })}
           </div>
         </div>
