@@ -80,7 +80,7 @@ function App() {
   return (
     <>
       <div className="w-full min-h-[100vh] flex justify-center items-center">
-        <div className="text-[var(--primary-color)] w-md my-8">
+        <div className="text-[var(--primary-color)] w-md m-8">
           <h1 className="font-bold text-3xl mb-8">Todo List</h1>
           <div className="flex gap-2 items-center mb-2">
             <input
@@ -108,7 +108,7 @@ function App() {
                   if (isEditing) saveEditedTodo();
                 }
               }}
-              className="border-b-2 border-b-gray-400 w-sm outline-none font-medium placeholder:font-medium placeholder:text-gray-400 px-2"
+              className="border-b-2 border-b-gray-400 max-w-sm w-full outline-none font-medium placeholder:font-medium placeholder:text-gray-400 px-2"
             />
             <button
               onClick={() => {

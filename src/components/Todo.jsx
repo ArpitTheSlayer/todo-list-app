@@ -13,7 +13,7 @@ export default function Todo({
   useEffect(() => {
     todo.finished = finished;
     saveToLocalStorage(todos);
-  }, [finished, todo, todos]);
+  }, [finished, todo, saveToLocalStorage, todos]);
 
   return (
     <div className="border border-[var(--primary-color)] rounded-2xl p-4 flex justify-between gap-2">
